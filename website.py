@@ -385,6 +385,10 @@
 
 # if __name__ == '__main__':
 #    app.run(debug=True)
+
+
+
+# ________________________________________________________________________
 from flask import Flask, request, jsonify, render_template
 import requests
 import pandas as pd
@@ -428,23 +432,55 @@ def contact():
 # =============================
 # Chatbot API Endpoint
 # =============================
-@app.route("/api/chat", methods=["POST"])
-def api_chat():
+@app.route('/api/chat', methods=['POST'])
+def process_chat():
+   """Process chat messages and return AI responses"""
+   data = request.json
+   user_message = data.get('message', '')
+  
+   if not user_message:
+       return jsonify({"error": "No message provided"})
+  
    try:
-       data = request.get_json()
-       user_message = data.get("message", "")
-
-
-       if user_message:
-           response = f"You said: {user_message}"
-       else:
-           response = "I didn’t catch that. Could you say it again?"
-
-
-       return jsonify({"response": response})
+       # Configure your API request
+       url = "https://chat-gpt26.p.rapidapi.com/"
+      
+       # Add context about e-waste and environmental implications
+       prompt_context = "You are an expert on environmental impacts of technology, especially " \
+                        "e-waste management and AI's environmental footprint. Answer questions " \
+                        "about environmental policies, sustainability in tech, and e-waste management."
+      
+       # Build the full message array with context
+       messages = [
+           {"role": "system", "content": prompt_context},
+           {"role": "user", "content": user_message}
+       ]
+      
+       payload = {
+           "model": "gpt-3.5-turbo",
+           "messages": messages
+       }
+      
+       headers = {
+           "x-rapidapi-key": "230d408ce9msh618b3867aa2fd58p17f418jsn4521e0840677",  # Replace with your actual API key
+           "x-rapidapi-host": "chat-gpt26.p.rapidapi.com",
+           "Content-Type": "application/json"
+       }
+      
+       response = requests.post(url, json=payload, headers=headers)
+       response_data = response.json()
+      
+       # Extract the AI's response from the API response
+       ai_response = response_data.get('choices', [{}])[0].get('message', {}).get('content', '')
+      
+       if not ai_response:
+           return jsonify({"error": "Failed to get response from AI"})
+          
+       return jsonify({"response": ai_response})
+      
    except Exception as e:
-       print(f"Error in /api/chat: {e}")
-       return jsonify({"error": "Something went wrong, please try again."}), 500
+       print(f"Chat API error: {str(e)}")
+       return jsonify({"error": f"Failed to process request: {str(e)}"})
 
 
 # =============================
