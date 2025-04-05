@@ -1,0 +1,16 @@
+Country,ISO_Code,Policy_Index,Policy_Description,Energy_Usage_MW,Carbon_Emissions_kg
+United States,USA,75,"Moderate environmental policies for AI-related activities.",3500,450000
+Canada,CAN,85,"Strict environmental regulations and sustainable AI practices.",4200,600000
+Germany,DEU,90,"Very strict environmental policies with emphasis on renewable energy.",2200,250000
+Brazil,BRA,60,"Less strict policies, with moderate enforcement.",2200,240000
+India,IND,50,"Developing policies with limited enforcement.",3800,500000
+Denmark,DNK,95,"Leading in climate policies with aggressive renewable energy adoption.",1800,150000
+Sweden,SWE,92,"Strong environmental policies focusing on sustainability and green tech.",2000,180000
+China,CHN,65,"Rapid AI development with emerging environmental considerations.",5000,700000
+United Kingdom,GBR,80,"Comprehensive policies integrating AI growth with environmental sustainability.",3000,350000
+France,FRA,88,"Robust environmental regulations promoting green AI technologies.",2500,275000
+Australia,AUS,70,"Moderate policies with recent focus on reducing carbon footprint.",3200,400000
+Japan,JPN,78,"Advanced technological policies with increasing emphasis on sustainability.",2800,300000
+South Korea,KOR,72,"Growing AI sector with policies evolving towards environmental concerns.",2900,320000
+Netherlands,NLD,85,"Progressive environmental policies supporting sustainable AI initiatives.",2100,200000
+Norway,NOR,93,"Pioneering in renewable energy usage and strict environmental regulations.",1700,140000

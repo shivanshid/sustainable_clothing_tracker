@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <title>Map – GreenAI</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+ <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+ <style>
+   body {
+     margin: 0;
+     font-family: 'Playfair Display', serif;
+     background-color: #f5f1e8;
+     color: #1e1e1e;
+   }
+
+
+   nav {
+     display: flex;
+     justify-content: center;
+     gap: 2rem;
+     padding: 1.5rem;
+     background: rgba(0, 0, 0, 0.05);
+     font-size: 1.2rem;
+   }
+
+
+   nav a {
+     color: #1e1e1e;
+     text-decoration: none;
+   }
+
+
+   nav a:hover {
+     text-decoration: underline;
+   }
+
+
+   .container {
+     max-width: 800px;
+     margin: 4rem auto;
+     background-color: white;
+     border-radius: 12px;
+     padding: 2.5rem;
+     box-shadow: 0 0 30px rgba(0, 0, 0, 0.06);
+   }
+
+
+   h1 {
+     font-size: 2.2rem;
+     margin-bottom: 1.5rem;
+     text-align: center;
+   }
+
+
+   .form-group {
+     margin-bottom: 1.5rem;
+   }
+
+
+   label {
+     display: block;
+     margin-bottom: 0.5rem;
+   }
+
+
+   select, button {
+     font-family: 'Playfair Display', serif;
+     width: 100%;
+     padding: 0.6rem;
+     font-size: 1rem;
+     border-radius: 8px;
+     border: 1px solid #ccc;
+   }
+
+
+   #update-btn {
+     margin-top: 1rem;
+     background-color: #1e1e1e;
+     color: white;
+     cursor: pointer;
+   }
+
+
+   #map {
+     margin-top: 2rem;
+     width: 100%;
+     height: 500px;
+   }
+
+
+   .loading, .error {
+     margin-top: 1rem;
+     text-align: center;
+     display: none;
+   }
+
+
+   .loading {
+     color: #888;
+   }
+
+
+   .error {
+     color: white;
+     background-color: #d9534f;
+     padding: 0.8rem;
+     border-radius: 8px;
+   }
+
+
+   footer {
+     text-align: center;
+     padding: 1rem;
+     margin-top: 3rem;
+     font-size: 0.9rem;
+   }
+ </style>
+</head>
+<body>
+
+
+ <!-- 🔗 Navigation Bar -->
+ <nav>
+   <a href="/">Home</a>
+   <a href="/map">Map</a>
+   <a href="/chatbot">Chatbot</a>
+   <a href="/how-to-help">How to Help</a>
+   <a href="/contact">Contact</a>
+ </nav>
+
+
+ <div class="container">
+   <h1>E-Waste Data Map</h1>
+
+
+   <div class="form-group">
+     <label for="data-type">Data Type</label>
+     <select id="data-type">
+       {% for data_type in data_types %}
+       <option value="{{ data_type }}">{{ data_type|capitalize }}</option>
+       {% endfor %}
+     </select>
+   </div>
+
+
+   <div class="form-group" id="measure-container">
+     <label for="measure-type">Measure</label>
+     <select id="measure-type">
+       <option value="GEN">Generation</option>
+       <option value="COL">Collection</option>
+       <option value="RCY">Recycling</option>
+       <option value="EXP">Export</option>
+     </select>
+   </div>
+
+
+   <div class="form-group" id="year-container">
+     <label for="year">Year</label>
+     <select id="year">
+       {% for year in years %}
+       <option value="{{ year }}">{{ year }}</option>
+       {% endfor %}
+     </select>
+   </div>
+
+
+   <button id="update-btn">Update Map</button>
+
+
+   <div class="loading" id="loading">Loading map data...</div>
+   <div class="error" id="error-message">Error loading data</div>
+
+
+   <div id="map"></div>
+ </div>
+
+
+ <footer>
+   &copy; {{ 2025 }} GreenAI — Built with OECD data for a greener digital world.
+ </footer>
+
+
+ <script>
+   const dataTypeSelect = document.getElementById('data-type');
+   const measureTypeSelect = document.getElementById('measure-type');
+   const yearSelect = document.getElementById('year');
+   const measureContainer = document.getElementById('measure-container');
+   const yearContainer = document.getElementById('year-container');
+   const updateBtn = document.getElementById('update-btn');
+   const loading = document.getElementById('loading');
+   const errorMsg = document.getElementById('error-message');
+
+
+   function updateControlsVisibility() {
+     const isEwaste = dataTypeSelect.value === 'ewaste';
+     measureContainer.style.display = isEwaste ? 'block' : 'none';
+     yearContainer.style.display = isEwaste ? 'block' : 'none';
+   }
+
+
+   function loadMap() {
+     const dataType = dataTypeSelect.value;
+     const measureType = measureTypeSelect.value;
+     const year = yearSelect.value;
+
+
+     loading.style.display = 'block';
+     errorMsg.style.display = 'none';
+
+
+     let url = `/get_data?data_type=${dataType}`;
+     if (dataType === 'ewaste') {
+       url += `&measure_type=${measureType}&year=${year}`;
+     }
+
+
+     fetch(url)
+       .then(res => res.json())
+       .then(data => {
+         loading.style.display = 'none';
+         if (data.error) {
+           errorMsg.textContent = data.error;
+           errorMsg.style.display = 'block';
+           return;
+         }
+         Plotly.newPlot('map', JSON.parse(data));
+       })
+       .catch(err => {
+         loading.style.display = 'none';
+         errorMsg.textContent = "Error loading map: " + err;
+         errorMsg.style.display = 'block';
+       });
+   }
+
+
+   window.addEventListener('load', function () {
+     updateControlsVisibility();
+     loadMap();
+     dataTypeSelect.addEventListener('change', updateControlsVisibility);
+     updateBtn.addEventListener('click', loadMap);
+   });
+ </script>
+
+
+</body>
+</html>
