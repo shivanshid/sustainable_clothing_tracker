@@ -1,1 +1,7 @@
 Flask
+requests
+pandas
+plotly
+plotly.express
+json
+xml.etree.ElementTree
